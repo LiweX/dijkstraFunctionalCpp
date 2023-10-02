@@ -75,3 +75,20 @@ vector<int> acuInit(const vector<Arista>& aristas, const Vertice& v, const vecto
                    });
     return pesosAcumulados;
 }
+
+// Función para actualizar los pesos acumulados y predecesores
+pair<vector<int>, vector<Vertice>> actpeso(const vector<int>& pacu,
+                                           const vector<Vertice>& prev,
+                                           const Arista& arista) {
+    vector<int> nuevosPesosAcumulados = pacu;
+    vector<Vertice> nuevosPredecesores = prev;
+
+    int costoNuevo = pacu[arista.origen.nombre - 1] + arista.peso;
+    
+    if (costoNuevo < pacu[arista.destino.nombre - 1]) {
+        nuevosPesosAcumulados[arista.destino.nombre - 1] = costoNuevo;
+        nuevosPredecesores[arista.destino.nombre - 1] = arista.origen;
+    }
+
+    return make_pair(nuevosPesosAcumulados, nuevosPredecesores);
+}
