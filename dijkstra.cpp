@@ -13,13 +13,8 @@ struct Arista {
     int peso;
 };
 
-struct Grafo {
-    vector<Vertice> vertices;
-    vector<Arista> aristas;
-};
-
 struct Dijkstra {
-    vector<Arista> aristas;
+    vector<Arista> a;
     vector<Vertice> vc;
     vector<Vertice> vnc;
     vector<int> pacu;
@@ -27,19 +22,17 @@ struct Dijkstra {
 };
 
 const int oo = 100;
+Vertice verticenulo = {0};
+
 
 // Función para calcular el costo entre dos vértices
-int costo(const vector<Arista>& aristas, const Vertice& origen, const Vertice& destino) {
-    //se recorre el vector de aristas y se devuelve el peso de la arista que cuyo
-    //origen y destino coincidan con los pasados como argumento.
-    //En caso que no se encuentre una arista que conecte los vertices se devuelve infinito
-    for (const auto& arista : aristas) {
-        if (arista.origen.nombre == origen.nombre && arista.destino.nombre == destino.nombre) {
-            return arista.peso;
-        }
-    }
-    return oo;
-}
+auto costo = [](const std::vector<Arista>& aristas, const Vertice& origen, const Vertice& destino) {
+    auto arista = find_if(aristas.begin(), aristas.end(), [&origen, &destino](const Arista& a) {
+        return a.origen.nombre == origen.nombre && a.destino.nombre == destino.nombre;
+    });
+    //
+    return (arista != aristas.end()) ? arista->peso : oo;
+};
 
 // Función para inicializar la lista de predecesores
 vector<Vertice> prevInit(const Vertice& v, const vector<Vertice>& vertices) {
@@ -84,7 +77,7 @@ pair<vector<int>, vector<Vertice>> actpeso(const vector<int>& pacu,
     vector<Vertice> nuevosPredecesores = prev;
 
     int costoNuevo = pacu[arista.origen.nombre - 1] + arista.peso;
-    
+
     if (costoNuevo < pacu[arista.destino.nombre - 1]) {
         nuevosPesosAcumulados[arista.destino.nombre - 1] = costoNuevo;
         nuevosPredecesores[arista.destino.nombre - 1] = arista.origen;
@@ -92,3 +85,36 @@ pair<vector<int>, vector<Vertice>> actpeso(const vector<int>& pacu,
 
     return make_pair(nuevosPesosAcumulados, nuevosPredecesores);
 }
+
+Dijkstra iteracion(const Dijkstra& d) {
+    Dijkstra resultado = d;
+
+    // Encuentra el próximo vértice a considerar
+    Vertice next = *(min_element(d.vnc.begin(), d.vnc.end(),
+        [&d](const Vertice& x, const Vertice& y) {
+            return d.pacu[x.nombre - 1] < d.pacu[y.nombre - 1];
+        }));
+
+    // Actualiza la lista de vértices considerados y no considerados
+    resultado.vc.insert(resultado.vc.begin(), next);
+    resultado.vnc.erase(remove(resultado.vnc.begin(), resultado.vnc.end(), next), resultado.vnc.end());
+
+    // Filtra las aristas candidatas
+    vector<Arista> aristasCandidatas;
+    for (const Arista& a : resultado.a) {
+        if (a.origen.nombre == next.nombre && find(resultado.vnc.begin(), resultado.vnc.end(), a.destino) != resultado.vnc.end()) {
+            aristasCandidatas.push_back(a);
+        }
+    }
+
+    // Actualiza los pesos acumulados y predecesores
+    for (const Arista& arista : aristasCandidatas) {
+        auto [nuevosPacu, nuevosPrev] = actpeso(resultado.pacu, resultado.prev, arista);
+        resultado.pacu = nuevosPacu;
+        resultado.prev = nuevosPrev;
+    }
+
+    return resultado;
+}
+
+
