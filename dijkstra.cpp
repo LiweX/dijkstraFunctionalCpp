@@ -37,31 +37,23 @@ auto costo = [](const std::vector<Arista>& aristas, const Vertice& origen, const
 // Función para inicializar la lista de predecesores
 auto previnicial = [](const Vertice& v, const std::vector<Vertice>& vertices) {
     std::vector<Vertice> predecesores(vertices.size(), verticenulo);
-    std::transform(vertices.begin(), vertices.end(), predecesores.begin(), [&v](const Vertice& x) {
-        return (x.nombre == v.nombre) ? v : verticenulo;
-    });
+    //Aqui se usa transform que es el equivalente a map. Va a aplicar una operacion a cada elemento dentro del rango especificado.
+    std::transform(vertices.begin(), vertices.end(), predecesores.begin(), 
+                    [&v](const Vertice& x) {
+                        return (x.nombre == v.nombre) ? v : verticenulo;
+                    });
     return predecesores;
 };
 
 // Función para inicializar la lista de pesos acumulados
-vector<int> acuInit(const vector<Arista>& aristas, const Vertice& v, const vector<Vertice>& vertices) {
-    // Se crea un vector que tiene el mismo tamaño que el número de vértices en el grafo 
-    // y se inizalizan todos los elementos del vector en {0}
-    vector<int> pesosAcumulados(vertices.size(), 0);
-    //Aqui se usa transform que es el equivalente a map. Va a aplicar una operacion a cada elemento dentro del rango especificado.
-    transform(vertices.begin(), vertices.end(), pesosAcumulados.begin(),
-                // La función lambda verifica si el vértice x es igual al vértice inicial v. 
-                // Si son iguales, significa que estamos en el vértice inicial, por lo que el peso acumulado es 0. 
-                // Si no son iguales, se utiliza la función costo para calcular el costo desde v hasta x
-                   [v, aristas](const Vertice& x) {
-                       if (x.nombre == v.nombre) {
-                           return 0;
-                       } else {
-                           return costo(aristas, v, x);
-                       }
-                   });
+auto acuinicial = [](const std::vector<Arista>& aristas, const Vertice& v, const std::vector<Vertice>& vertices) {
+    std::vector<int> pesosAcumulados(vertices.size(), 0);
+    std::transform(vertices.begin(), vertices.end(), pesosAcumulados.begin(),
+                    [&aristas, &v](const Vertice& x) {
+                        return (x.nombre != v.nombre) ? costo(aristas, v, x) : 0;
+                    });
     return pesosAcumulados;
-}
+};
 
 // Función para actualizar los pesos acumulados y predecesores
 pair<vector<int>, vector<Vertice>> actpeso(const vector<int>& pacu,
