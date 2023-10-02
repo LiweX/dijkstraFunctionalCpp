@@ -35,19 +35,13 @@ auto costo = [](const std::vector<Arista>& aristas, const Vertice& origen, const
 };
 
 // Función para inicializar la lista de predecesores
-vector<Vertice> prevInit(const Vertice& v, const vector<Vertice>& vertices) {
-    // Se crea un vector que tiene el mismo tamaño que el número de vértices en el grafo 
-    // y se inizalizan todos los elementos del vector en {0}
-    vector<Vertice> predecesores(vertices.size(), {0});
-    //Aqui se usa transform que es el equivalente a map. Va a aplicar una operacion a cada elemento dentro del rango especificado.
-    transform(vertices.begin(), vertices.end(), predecesores.begin(),
-                    // La función lambda compara el nombre del vértice x con el nombre del vértice v.
-                    // Si son iguales, significa que x es el vértice para el cual estamos inicializando los predecesores
-                    // por lo que se devuelve x. Si no son iguales, se devuelve Vertice{0}
-                    // para indicar que no hay predecesor conocido para ese vértice.
-                   [v](const Vertice& x) { return (x.nombre == v.nombre) ? x : Vertice{0}; });
+auto previnicial = [](const Vertice& v, const std::vector<Vertice>& vertices) {
+    std::vector<Vertice> predecesores(vertices.size(), verticenulo);
+    std::transform(vertices.begin(), vertices.end(), predecesores.begin(), [&v](const Vertice& x) {
+        return (x.nombre == v.nombre) ? v : verticenulo;
+    });
     return predecesores;
-}
+};
 
 // Función para inicializar la lista de pesos acumulados
 vector<int> acuInit(const vector<Arista>& aristas, const Vertice& v, const vector<Vertice>& vertices) {
